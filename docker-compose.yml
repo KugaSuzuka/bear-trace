@@ -1,0 +1,64 @@
+services:
+  node:
+    image: node:latest
+    working_dir: /projects
+    ports:
+      - 4200:4200
+    volumes:
+      - ./front:/projects:cached
+    tty: true
+#    command: bash -c "
+#      npm cache clean -f;
+#      npm install;
+#      cp -f src/environments/environment.develop.ts src/environments/environment.ts;
+#      npm link @angular/cli && export PATH='$HOME/.npm-global/bin:$PATH';
+#      npm start;
+#      "
+
+  php:
+    build: ./docker/php
+    volumes:
+      - ./back:/var/www:cached
+#    command: -c "
+#      cp -f .env.develop .env;
+#      composer install;
+#      php artisan config:cache && php artisan config:clear;
+#      "
+
+  nginx:
+    image: nginx
+    ports:
+      - 8080:80
+    volumes:
+      - ./back:/var/www:cached
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:cached
+    depends_on:
+      - php
+
+  mysql:
+    build: ./docker/mysql
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: sample
+      TZ: "Asia/Tokyo"
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: on-failure
+    volumes:
+      - mysqldb:/var/lib/mysql:cached
+    ports:
+      - 3306:3306
+
+  couchdb:
+    image: couchdb
+    restart: always
+    ports:
+      - "5984:5984"
+    environment:
+      - COUCHDB_USER=admin
+      - COUCHDB_PASSWORD=password
+    volumes:
+      - ./dbdata:/opt/couchdb/data
+
+volumes:
+  mysqldb:
