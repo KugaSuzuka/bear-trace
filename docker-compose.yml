@@ -7,23 +7,21 @@ services:
     volumes:
       - ./front:/projects:cached
     tty: true
-#    command: bash -c "
-#      npm cache clean -f;
-#      npm install;
-#      cp -f src/environments/environment.develop.ts src/environments/environment.ts;
-#      npm link @angular/cli && export PATH='$HOME/.npm-global/bin:$PATH';
-#      npm start;
-#      "
+    command: bash -c "
+      npm cache clean -f;
+      npm install;
+      cp -f src/environments/environment.develop.ts src/environments/environment.ts;
+      npm link @angular/cli && export PATH='$HOME/.npm-global/bin:$PATH';
+      npm start;"
 
   php:
     build: ./docker/php
     volumes:
       - ./back:/var/www:cached
-#    command: -c "
-#      cp -f .env.develop .env;
-#      composer install;
-#      php artisan config:cache && php artisan config:clear;
-#      "
+    command: -c "
+      cp -f .env.develop .env;
+      composer install;
+      php artisan config:cache && php artisan config:clear;"
 
   nginx:
     image: nginx
